@@ -1,0 +1,8 @@
+{
+  "name": "Mis Finanzas",
+  "description": "Una aplicación móvil minimalista, intuitiva y rápida para registrar tus ingresos y gastos diarios en segundos, con calendario de recordatorios y reportes sencillos.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
