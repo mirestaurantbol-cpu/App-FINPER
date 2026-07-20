@@ -26,7 +26,7 @@ import {
   ReceiptText,
   Plus
 } from 'lucide-react';
-import { SplashScreen, InstallBanner, RestaurantLogoSVG } from './components/PWAScreen';
+import { SplashScreen, InstallBanner, FinanzasLogoSVG } from './components/PWAScreen';
 
 type TabType = 'movements' | 'calendar' | 'summary';
 
@@ -169,14 +169,14 @@ export default function App() {
         <header className="px-5 py-4 bg-white border-b border-slate-100 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center shadow-xs">
-              <RestaurantLogoSVG className="w-8 h-8" />
+              <FinanzasLogoSVG className="w-8 h-8" />
             </div>
             <div>
               <h1 className="text-base font-black text-slate-900 font-display tracking-tight leading-none animate-fade-in">
-                {profile.isRegistered ? `Hola, ${profile.name}!` : 'Restaurante Pro'}
+                {profile.isRegistered ? `Hola, ${profile.name}!` : 'Finanzas Pro'}
               </h1>
               <p className="text-[10px] font-bold text-slate-400 font-sans tracking-wide uppercase mt-1">
-                {profile.isRegistered ? 'Mi Caja de Restaurante' : 'Caja y Estadísticas PWA'}
+                {profile.isRegistered ? 'Mi Caja Personalizada' : 'Caja y Estadísticas PWA'}
               </p>
             </div>
           </div>

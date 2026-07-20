@@ -1,6 +1,6 @@
 {
-  "name": "Mis Finanzas",
-  "description": "Sistema PWA profesional para administrar pedidos, menú, gastos y estadísticas de un restaurante de forma offline y con instalación rápida.",
+  "name": "Finanzas Pro",
+  "description": "Sistema PWA profesional para administrar finanzas personales, ingresos, gastos y estadísticas en tiempo real de forma offline.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

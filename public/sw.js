@@ -1,4 +1,4 @@
-const CACHE_NAME = 'restaurante-pro-cache-v1';
+const CACHE_NAME = 'finanzas-pro-cache-v1';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',

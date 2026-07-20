@@ -1,35 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Download, X, Check, Award } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
-// Elegant Inline Restaurant SVG Logo
-export const RestaurantLogoSVG: React.FC<{ className?: string }> = ({ className = "w-20 h-20" }) => (
+// Elegant Inline Finance SVG Logo
+export const FinanzasLogoSVG: React.FC<{ className?: string }> = ({ className = "w-20 h-20" }) => (
   <svg viewBox="0 0 100 100" className={className} xmlns="http://www.w3.org/2000/svg">
     {/* Subtle Outer Glow / Shadow circle */}
     <circle cx="50" cy="50" r="42" fill="rgba(0, 0, 0, 0.04)" />
     
-    {/* Plate */}
-    <circle cx="50" cy="50" r="34" fill="white" stroke="#FFE0B2" strokeWidth="1" />
-    <circle cx="50" cy="50" r="26" fill="none" stroke="#FFF3E0" strokeWidth="2.5" />
+    {/* Elegant Rounded Core Container */}
+    <rect x="20" y="20" width="60" height="60" rx="18" fill="white" stroke="#FFE0B2" strokeWidth="1" />
+    <rect x="26" y="26" width="48" height="48" rx="14" fill="none" stroke="#FFF3E0" strokeWidth="2.5" />
     
-    {/* Fork (Left Side) */}
-    <g transform="translate(1, 0)">
-      <path d="M34,39 L34,57 M34,57 L34,66 M31,39 L31,49 M37,39 L37,49" stroke="#FF5722" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M31,49 C31,54 37,54 37,49" fill="none" stroke="#FF5722" strokeWidth="1.8" strokeLinecap="round" />
-    </g>
+    {/* Dynamic Rising Financial Trend Bars */}
+    <rect x="36" y="52" width="6" height="14" rx="2" fill="#FFB74D" />
+    <rect x="47" y="42" width="6" height="24" rx="2" fill="#FFA726" />
+    <rect x="58" y="32" width="6" height="34" rx="2" fill="#FF5722" />
     
-    {/* Spoon (Right Side) */}
-    <g transform="translate(-1, 0)">
-      <path d="M65,53 L65,66" stroke="#FF5722" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <ellipse cx="65" cy="44" rx="4.5" ry="7.5" fill="#FF5722" />
-    </g>
-    
-    {/* Fire/Flame (Center over Plate) */}
-    <g transform="translate(0, 3)">
-      {/* Outer red-orange flame */}
-      <path d="M50,26 C56,31 56,44 50,49 C44,44 44,31 50,26 Z" fill="#FF3D00" />
-      {/* Inner yellow core */}
-      <path d="M50,32 C53,35 53,44 50,47 C47,44 47,35 50,32 Z" fill="#FFEB3B" />
-    </g>
+    {/* Sleek Sparkle / Star of growth on the highest bar */}
+    <path d="M61,20 L62,23 L65,24 L62,25 L61,28 L60,25 L57,24 L60,23 Z" fill="#FFD54F" />
   </svg>
 );
 
@@ -75,16 +64,16 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
       <div className="text-center space-y-6 flex flex-col items-center max-w-xs">
         {/* Animated Logo Container */}
         <div className="bg-white/10 p-5 rounded-[32px] backdrop-blur-md shadow-2xl border border-white/20 animate-pulse active:scale-95 transition-all">
-          <RestaurantLogoSVG className="w-24 h-24 drop-shadow-xl" />
+          <FinanzasLogoSVG className="w-24 h-24 drop-shadow-xl" />
         </div>
 
         {/* Text Details */}
         <div className="space-y-2">
           <h2 className="text-3xl font-black text-white font-display tracking-tight drop-shadow-sm">
-            Restaurante Pro
+            Finanzas Pro
           </h2>
           <p className="text-xs font-bold uppercase tracking-widest text-orange-100 font-sans">
-            SISTEMA PROFESIONAL
+            CONTROL DE FINANZAS
           </p>
         </div>
 
@@ -105,140 +94,163 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
   );
 };
 
-// 2. Install Banner Component
+// 2. Install Banner/Dialog Component
 export const InstallBanner: React.FC = () => {
   const [showBanner, setShowBanner] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    // Check if user dismissed the banner recently
-    const dismissedUntil = localStorage.getItem('pwa_banner_dismissed_until');
-    const isDismissed = dismissedUntil && new Date(dismissedUntil) > new Date();
+    // Check if already installed (via standalone display mode)
+    const checkIsInstalled = () => {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                           (window.navigator as any).standalone === true;
+      if (isStandalone) {
+        setIsInstalled(true);
+        return true;
+      }
+      return false;
+    };
 
-    // Check if already installed
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                         (window.navigator as any).standalone === true;
-
-    if (isStandalone) {
-      setIsInstalled(true);
+    if (checkIsInstalled()) {
       return;
     }
 
-    // Capture the installation prompt event
+    // Check if dismissed recently (several days)
+    const dismissedUntil = localStorage.getItem('pwa_install_dismissed_until');
+    const isDismissed = dismissedUntil && new Date(dismissedUntil) > new Date();
+
+    // Capture the installation prompt event automatically
     const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
+      e.preventDefault(); // Prevent default browser prompt info-bar
       setDeferredPrompt(e);
-      if (!isDismissed) {
+      
+      // Show immediately if not dismissed recently and not already installed
+      if (!isDismissed && !checkIsInstalled()) {
         setShowBanner(true);
       }
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // Detect if app was installed successfully
+    // Track when the application has been installed successfully
     const handleAppInstalled = () => {
       console.log('App was installed successfully');
       setIsInstalled(true);
       setShowBanner(false);
+      localStorage.setItem('pwa_installed_permanently', 'true');
     };
 
     window.addEventListener('appinstalled', handleAppInstalled);
 
-    // If beforeinstallprompt is NOT supported or didn't fire yet,
-    // we still show our custom banner invitation automatically on first load
-    // so the user can easily install or see the card!
-    const timer = setTimeout(() => {
-      if (!isStandalone && !isDismissed && !deferredPrompt) {
-        // Show banner anyway to let them know it's installable
-        setShowBanner(true);
-      }
-    }, 3000);
-
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
-      clearTimeout(timer);
     };
-  }, [deferredPrompt]);
+  }, []);
 
   const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      // Trigger native install dialog
-      deferredPrompt.prompt();
+    if (!deferredPrompt) return;
+
+    try {
+      // Execute the saved beforeinstallprompt
+      await deferredPrompt.prompt();
+      
+      // Wait for user choice
       const { outcome } = await deferredPrompt.userChoice;
-      console.log(`User response to install prompt: ${outcome}`);
+      console.log(`User choice for PWA installation: ${outcome}`);
+      
       if (outcome === 'accepted') {
         setIsInstalled(true);
         setShowBanner(false);
+        localStorage.setItem('pwa_installed_permanently', 'true');
+      } else {
+        // If they cancelled, we save dismissal timestamp for 5 days ("varios días")
+        handleDismissClick();
       }
-      setDeferredPrompt(null);
-    } else {
-      // Browser does not support prompt or iOS -> Show a friendly dialog explaining native PWA features
-      // Or fallback to triggering normal install instruction / native prompt if standard
-      alert(
-        "Para instalar en tu dispositivo:\n\n" +
-        "• En Android: Presiona los tres puntos u opción de instalar en tu navegador.\n" +
-        "• En iPhone: Presiona 'Compartir' y luego 'Agregar a pantalla de inicio'."
-      );
-      setShowBanner(false);
+    } catch (err) {
+      console.error('Error invoking PWA installation prompt:', err);
     }
+    
+    setDeferredPrompt(null);
   };
 
   const handleDismissClick = () => {
-    // Save dismissal timestamp for 2 days to comply with:
-    // "volver a mostrar la sugerencia después de algunos días o cuando vuelva a ingresar a la aplicación"
+    // Save dismissal timestamp for 5 days to comply with: "volver a mostrar la sugerencia después de varios días"
     const retryDate = new Date();
-    retryDate.setDate(retryDate.getDate() + 2); // Show again in 2 days
-    localStorage.setItem('pwa_banner_dismissed_until', retryDate.toISOString());
+    retryDate.setDate(retryDate.getDate() + 5); // 5 days interval
+    localStorage.setItem('pwa_install_dismissed_until', retryDate.toISOString());
     setShowBanner(false);
   };
 
-  if (!showBanner || isInstalled) return null;
+  const isPermanentlyInstalled = localStorage.getItem('pwa_installed_permanently') === 'true';
+
+  // If already installed, never show again
+  if (isInstalled || isPermanentlyInstalled) {
+    return null;
+  }
 
   return (
-    <div className="bg-gradient-to-r from-orange-500 via-red-500 to-red-500 text-white p-4 shadow-lg border-b border-orange-400/20 shrink-0 z-40 relative animate-fade-in">
-      <div className="flex gap-3 items-start">
-        {/* Banner icon */}
-        <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0 border border-white/20 animate-bounce">
-          <Download className="w-5 h-5 text-white" />
-        </div>
+    <AnimatePresence>
+      {showBanner && (
+        <div className="fixed inset-0 bg-slate-950/75 backdrop-blur-md z-[999] flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ type: "spring", duration: 0.5, bounce: 0.25 }}
+            className="bg-white rounded-[32px] p-6 shadow-2xl border border-slate-100 max-w-sm w-full space-y-6 text-center relative overflow-hidden"
+          >
+            {/* Elegant glowing ambient backdrop decorations */}
+            <div className="absolute -top-16 -left-16 w-32 h-32 bg-orange-100/40 rounded-full blur-2xl" />
+            <div className="absolute -bottom-16 -right-16 w-32 h-32 bg-red-100/40 rounded-full blur-2xl" />
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <h4 className="text-xs font-black uppercase tracking-wider text-orange-100 font-display">
-            ¡Instala Restaurante Pro!
-          </h4>
-          <p className="text-[11px] font-semibold text-white/95 leading-normal mt-0.5">
-            Instala esta aplicación para acceder más rápido y utilizarla como una app en tu celular.
-          </p>
-
-          {/* Action buttons */}
-          <div className="flex gap-2 mt-2.5">
-            <button
-              onClick={handleInstallClick}
-              className="bg-white text-orange-600 font-display font-black text-[10px] uppercase tracking-wider px-4 py-2 rounded-lg active:scale-95 transition-all shadow-3xs cursor-pointer hover:bg-orange-50 flex items-center gap-1"
-            >
-              <Check className="w-3 h-3 stroke-[3]" />
-              Instalar
-            </button>
-            <button
+            {/* Subtle Close Button */}
+            <button 
               onClick={handleDismissClick}
-              className="bg-transparent hover:bg-white/10 text-white/90 border border-white/25 font-display font-bold text-[10px] uppercase tracking-wider px-3 py-2 rounded-lg active:scale-95 transition-all cursor-pointer"
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all cursor-pointer z-10"
+              aria-label="Cerrar diálogo"
             >
-              Ahora no
+              <X className="w-5 h-5 stroke-[2.5]" />
             </button>
-          </div>
-        </div>
 
-        {/* Close Button */}
-        <button
-          onClick={handleDismissClick}
-          className="p-1 text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-all cursor-pointer"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-    </div>
+            {/* Premium Logo / Mascot */}
+            <div className="flex justify-center pt-2 relative">
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100/50 p-4.5 rounded-[24px] border border-orange-100 shadow-sm animate-pulse">
+                <FinanzasLogoSVG className="w-16 h-16" />
+              </div>
+            </div>
+
+            {/* Main Message details */}
+            <div className="space-y-3 relative px-1">
+              <h3 className="text-xl font-black text-slate-900 font-display tracking-tight leading-tight">
+                Instalar Finanzas Pro
+              </h3>
+              <p className="text-xs font-semibold text-slate-500 font-sans leading-relaxed">
+                Tienes disponible la versión instalada de esta aplicación. Instálala para acceder más rápido y disfrutar de una mejor experiencia.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-2.5 pt-2 relative">
+              <button
+                onClick={handleInstallClick}
+                className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-display font-black text-xs uppercase tracking-widest py-4 px-4 rounded-xl shadow-lg shadow-orange-500/15 hover:from-orange-600 hover:to-red-600 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2"
+              >
+                <Download className="w-4 h-4 stroke-[2.5]" />
+                Instalar aplicación
+              </button>
+              
+              <button
+                onClick={handleDismissClick}
+                className="w-full bg-slate-50 hover:bg-slate-100 text-slate-500 font-display font-black text-[10px] uppercase tracking-wider py-3 px-4 rounded-xl active:scale-[0.98] transition-all cursor-pointer"
+              >
+                Quizás más tarde
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 };
