@@ -10,25 +10,32 @@ import {
   loadIncomeCategories,
   saveIncomeCategories,
   loadExpenseCategories,
-  saveExpenseCategories
+  saveExpenseCategories,
+  loadAccounts,
+  saveAccounts
 } from './utils/storage';
 import { MovementTab } from './components/MovementTab';
 import { CalendarTab } from './components/CalendarTab';
 import { SummaryTab } from './components/SummaryTab';
 import { UserSettingsModal } from './components/UserSettingsModal';
+import { AddMovementModal } from './components/AddMovementModal';
 import { 
   Coins, 
   Calendar as CalendarIcon, 
   BarChart3, 
-  ReceiptText 
+  ReceiptText,
+  Plus
 } from 'lucide-react';
+import { SplashScreen, InstallBanner, RestaurantLogoSVG } from './components/PWAScreen';
 
 type TabType = 'movements' | 'calendar' | 'summary';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<TabType>('movements');
+  const [activeTab, setActiveTab] = useState<TabType>('summary');
   const [movements, setMovements] = useState<Movement[]>([]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [isAddMovementOpen, setIsAddMovementOpen] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
   
   // User Profile & Category States
   const [profile, setProfile] = useState<UserProfile>({
@@ -39,6 +46,7 @@ export default function App() {
   });
   const [incomeCategories, setIncomeCategories] = useState<string[]>([]);
   const [expenseCategories, setExpenseCategories] = useState<string[]>([]);
+  const [accounts, setAccounts] = useState<string[]>([]);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Load initial data from localStorage on mount
@@ -56,6 +64,7 @@ export default function App() {
     
     setIncomeCategories(loadIncomeCategories());
     setExpenseCategories(loadExpenseCategories());
+    setAccounts(loadAccounts());
   }, []);
 
   // Handlers for Movements
@@ -118,6 +127,13 @@ export default function App() {
     }
   };
 
+  // Account addition callback for MovementTab
+  const handleAddAccountFromTab = (name: string) => {
+    const updated = [...accounts, name];
+    setAccounts(updated);
+    saveAccounts(updated);
+  };
+
   const getAvatarColorClass = (seed: string) => {
     const idx = parseInt(seed.replace('color-', '')) || 0;
     const colors = [
@@ -146,18 +162,21 @@ export default function App() {
           </div>
         </div>
 
+        {/* PWA Automatic Installation Banner */}
+        <InstallBanner />
+
         {/* Application Core Header with custom Profile Access */}
         <header className="px-5 py-4 bg-white border-b border-slate-100 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center shadow-xs">
-              <Coins className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center shadow-xs">
+              <RestaurantLogoSVG className="w-8 h-8" />
             </div>
             <div>
-              <h1 className="text-base font-black text-slate-900 font-display tracking-tight leading-none">
-                {profile.isRegistered ? `Hola, ${profile.name}!` : 'Mis Finanzas'}
+              <h1 className="text-base font-black text-slate-900 font-display tracking-tight leading-none animate-fade-in">
+                {profile.isRegistered ? `Hola, ${profile.name}!` : 'Restaurante Pro'}
               </h1>
               <p className="text-[10px] font-bold text-slate-400 font-sans tracking-wide uppercase mt-1">
-                {profile.isRegistered ? 'Mi Caja Personalizada' : 'Control rápido de caja'}
+                {profile.isRegistered ? 'Mi Caja de Restaurante' : 'Caja y Estadísticas PWA'}
               </p>
             </div>
           </div>
@@ -186,6 +205,8 @@ export default function App() {
               incomeCategories={incomeCategories}
               expenseCategories={expenseCategories}
               onAddCategory={handleAddCategoryFromTab}
+              accounts={accounts}
+              onAddAccount={handleAddAccountFromTab}
             />
           )}
 
@@ -206,6 +227,15 @@ export default function App() {
             />
           )}
         </main>
+
+        {/* Floating Action Button (FAB) for adding new transaction */}
+        <button
+          onClick={() => setIsAddMovementOpen(true)}
+          className="absolute bottom-24 right-5 w-14 h-14 bg-blue-600 hover:bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer z-40 group"
+          title="Registrar nuevo movimiento"
+        >
+          <Plus className="w-7 h-7 transition-transform group-hover:rotate-90 duration-300" />
+        </button>
 
         {/* Lower Navigation Bar */}
         <nav className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-100 flex justify-around py-2.5 pb-5 px-4 z-40 shadow-[0_-4px_16px_rgba(0,0,0,0.02)] shrink-0">
@@ -262,7 +292,24 @@ export default function App() {
         expenseCategories={expenseCategories}
         onUpdateIncomeCategories={setIncomeCategories}
         onUpdateExpenseCategories={setExpenseCategories}
+        accounts={accounts}
+        onUpdateAccounts={setAccounts}
       />
+
+      <AddMovementModal
+        isOpen={isAddMovementOpen}
+        onClose={() => setIsAddMovementOpen(false)}
+        currency={profile.currency}
+        incomeCategories={incomeCategories}
+        expenseCategories={expenseCategories}
+        onAddCategory={handleAddCategoryFromTab}
+        accounts={accounts}
+        onAddAccount={handleAddAccountFromTab}
+        onAddMovement={handleAddMovement}
+      />
+
+      {/* Fullscreen splash screen overlay */}
+      {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
     </div>
   );
 }

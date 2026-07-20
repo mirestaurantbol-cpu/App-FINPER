@@ -198,6 +198,26 @@ export const saveExpenseCategories = (categories: string[]): void => {
   localStorage.setItem(EXPENSE_CATEGORIES_KEY, JSON.stringify(categories));
 };
 
+const ACCOUNTS_KEY = 'mis_finanzas_accounts';
+const DEFAULT_ACCOUNTS = ['Efectivo', 'Banco BCP', 'Banco Mercantil', 'Tarjeta de Crédito'];
+
+export const loadAccounts = (): string[] => {
+  const data = localStorage.getItem(ACCOUNTS_KEY);
+  if (!data) {
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(DEFAULT_ACCOUNTS));
+    return DEFAULT_ACCOUNTS;
+  }
+  try {
+    return JSON.parse(data);
+  } catch (e) {
+    return DEFAULT_ACCOUNTS;
+  }
+};
+
+export const saveAccounts = (accounts: string[]): void => {
+  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+};
+
 // Export movements to CSV string
 export const exportToCSVString = (movements: Movement[]): string => {
   // UTF-8 BOM to open correctly in Excel

@@ -5,6 +5,7 @@ export interface Movement {
   type: MovementType;
   amount: number;
   category: string;
+  account?: string; // Cuenta de origen/destino (ej: Efectivo, Banco, etc.)
   date: string; // YYYY-MM-DD
   note?: string;
 }

@@ -1,6 +1,6 @@
 {
   "name": "Mis Finanzas",
-  "description": "Una aplicación móvil minimalista, intuitiva y rápida para registrar tus ingresos y gastos diarios en segundos, con calendario de recordatorios y reportes sencillos.",
+  "description": "Sistema PWA profesional para administrar pedidos, menú, gastos y estadísticas de un restaurante de forma offline y con instalación rápida.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

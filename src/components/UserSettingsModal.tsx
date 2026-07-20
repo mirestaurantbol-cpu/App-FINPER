@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile } from '../types';
-import { X, User, Tag, Trash2, Plus, Sparkles, Check } from 'lucide-react';
+import { X, User, Tag, Trash2, Plus, Sparkles, Check, Wallet } from 'lucide-react';
 import { 
   loadIncomeCategories, 
   saveIncomeCategories, 
   loadExpenseCategories, 
-  saveExpenseCategories 
+  saveExpenseCategories,
+  saveAccounts
 } from '../utils/storage';
 
 interface UserSettingsModalProps {
@@ -17,6 +18,8 @@ interface UserSettingsModalProps {
   expenseCategories: string[];
   onUpdateIncomeCategories: (cats: string[]) => void;
   onUpdateExpenseCategories: (cats: string[]) => void;
+  accounts: string[];
+  onUpdateAccounts: (accs: string[]) => void;
 }
 
 const AVATAR_COLORS = [
@@ -36,9 +39,11 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
   incomeCategories,
   expenseCategories,
   onUpdateIncomeCategories,
-  onUpdateExpenseCategories
+  onUpdateExpenseCategories,
+  accounts,
+  onUpdateAccounts
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'profile' | 'categories'>('profile');
+  const [activeSubTab, setActiveSubTab] = useState<'profile' | 'categories' | 'accounts'>('profile');
   const [catType, setCatType] = useState<'expense' | 'income'>('expense');
 
   // Profile Form State
@@ -48,6 +53,8 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
 
   // New Category State
   const [newCatName, setNewCatName] = useState('');
+  // New Account State
+  const [newAccountName, setNewAccountName] = useState('');
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
@@ -128,6 +135,36 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
     showToast(`Categoría "${catToDelete}" eliminada`);
   };
 
+  const handleAddAccount = (e: React.FormEvent) => {
+    e.preventDefault();
+    const formatted = newAccountName.trim();
+    if (!formatted) return;
+
+    if (accounts.some(a => a.toLowerCase() === formatted.toLowerCase())) {
+      showToast('Esta cuenta ya existe');
+      return;
+    }
+
+    const capitalizeName = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    const updated = [...accounts, capitalizeName];
+    onUpdateAccounts(updated);
+    saveAccounts(updated);
+    setNewAccountName('');
+    showToast(`Cuenta "${capitalizeName}" agregada`);
+  };
+
+  const handleDeleteAccount = (accToDelete: string) => {
+    if (accounts.length <= 1) {
+      showToast('Debes mantener al menos una cuenta');
+      return;
+    }
+
+    const updated = accounts.filter(a => a !== accToDelete);
+    onUpdateAccounts(updated);
+    saveAccounts(updated);
+    showToast(`Cuenta "${accToDelete}" eliminada`);
+  };
+
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center sm:items-center p-0 sm:p-4 animate-fade-in">
       <div className="absolute inset-0" onClick={onClose} />
@@ -175,7 +212,7 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
               }`}
             >
               <User className="w-4 h-4" />
-              Mi Perfil
+              Perfil
             </button>
             <button
               onClick={() => setActiveSubTab('categories')}
@@ -188,12 +225,23 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
               <Tag className="w-4 h-4" />
               Categorías
             </button>
+            <button
+              onClick={() => setActiveSubTab('accounts')}
+              className={`flex-1 py-3 text-sm font-semibold font-display flex items-center justify-center gap-1.5 border-b-2 transition-all cursor-pointer ${
+                activeSubTab === 'accounts'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              <Wallet className="w-4 h-4" />
+              Cuentas
+            </button>
           </div>
         )}
 
         {/* Scrollable Content */}
         <div className="p-6 overflow-y-auto space-y-5 flex-1">
-          {activeSubTab === 'profile' ? (
+          {activeSubTab === 'profile' && (
             <form onSubmit={handleSaveProfileSubmit} className="space-y-4">
               {/* Name field */}
               <div>
@@ -269,11 +317,14 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
                 {profile.isRegistered ? 'Guardar Cambios' : 'Comenzar a Registrar'}
               </button>
             </form>
-          ) : (
+          )}
+
+          {activeSubTab === 'categories' && (
             <div className="space-y-4">
               {/* Category Segment switcher */}
               <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
                 <button
+                  type="button"
                   onClick={() => setCatType('expense')}
                   className={`py-2 text-xs font-display font-bold rounded-lg transition-all cursor-pointer ${
                     catType === 'expense'
@@ -284,6 +335,7 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
                   Gastos
                 </button>
                 <button
+                  type="button"
                   onClick={() => setCatType('income')}
                   className={`py-2 text-xs font-display font-bold rounded-lg transition-all cursor-pointer ${
                     catType === 'income'
@@ -328,9 +380,68 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
                         {cat}
                       </span>
                       <button
+                        type="button"
                         onClick={() => handleDeleteCategory(cat)}
                         className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all cursor-pointer"
                         title="Eliminar categoría"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeSubTab === 'accounts' && (
+            <div className="space-y-4">
+              <div className="p-3 bg-blue-50 border border-blue-100/50 rounded-xl">
+                <p className="text-[11px] font-medium text-blue-700 leading-normal">
+                  Define las cuentas, carteras o bancos donde guardas tu dinero para asignar tus movimientos.
+                </p>
+              </div>
+
+              {/* Add New Account Form inline */}
+              <form onSubmit={handleAddAccount} className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Nueva cuenta (ej: Efectivo, Banco Mercantil)"
+                  value={newAccountName}
+                  onChange={(e) => setNewAccountName(e.target.value)}
+                  className="flex-1 bg-slate-50 border border-slate-100 outline-hidden py-2 px-3.5 rounded-xl text-xs font-semibold text-slate-800 focus:border-blue-500 placeholder:text-slate-300"
+                />
+                <button
+                  type="submit"
+                  className="bg-blue-600 hover:bg-blue-500 text-white font-display font-bold text-xs py-2 px-4 rounded-xl shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Agregar
+                </button>
+              </form>
+
+              {/* Accounts Scroll List with delete buttons */}
+              <div>
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 font-sans">
+                  Cuentas actuales ({accounts.length})
+                </h4>
+                <div className="space-y-1.5 max-h-[30vh] overflow-y-auto pr-1">
+                  {accounts.map((acc) => (
+                    <div
+                      key={acc}
+                      className="flex items-center justify-between p-3 bg-slate-50 border border-slate-100/50 rounded-xl"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Wallet className="w-3.5 h-3.5 text-slate-400" />
+                        <span className="text-xs font-semibold text-slate-700 font-sans">
+                          {acc}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteAccount(acc)}
+                        className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all cursor-pointer"
+                        title="Eliminar cuenta"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
